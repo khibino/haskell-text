@@ -113,9 +113,15 @@ _hs_text_decode_utf8(uint16_t *dest, size_t *destoff,
   uint16_t *d = dest + *destoff;
   const uint8_t const *s = src;
   uint32_t state = UTF8_ACCEPT;
+  uint32_t codepoint = 0;
+  /* This value is accumulated by the `decode` procedure in this file,
+     so it's wrong to make a fresh variable every lap of the loop.
+     From text-0.11.1.5 to text-0.11.3.1 has this BUG.
+     For example, gcc-10.2 changes the behavior of this code
+     for different optimization levels (between -O0 and -O2).
+  */
 
   while (s < srcend) {
-    uint32_t codepoint;
 
 #if defined(__i386__) || defined(__x86_64__)
     /*
